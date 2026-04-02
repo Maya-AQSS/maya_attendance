@@ -1,17 +1,19 @@
-# from odoo import models, fields, api
+from odoo import models, fields
 
+class MayaCoreEmployee(models.Model):
+    _inherit = 'maya_core.employee'
 
-# class maya_attendance(models.Model):
-#     _name = 'maya_attendance.maya_attendance'
-#     _description = 'maya_attendance.maya_attendance'
+    id_tarjeta_rfid = fields.Integer(
+        string='ID Tarjeta RFID',
+        help="Identificador físico de la tarjeta para poder fichar",
+        index=True,     
+        required = True
+    )
 
-#     name = fields.Char()
-#     value = fields.Integer()
-#     value2 = fields.Float(compute="_value_pc", store=True)
-#     description = fields.Text()
-#
-#     @api.depends('value')
-#     def _value_pc(self):
-#         for record in self:
-#             record.value2 = float(record.value) / 100
-
+    _sql_constraints = [
+        (
+            'rfid_unique', 
+            'unique(id_tarjeta_rfid)', 
+            'Error: El ID de tarjeta RFID ya está asignado a otro empleado.'
+        )
+    ]
