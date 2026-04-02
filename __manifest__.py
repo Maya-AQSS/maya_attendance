@@ -1,16 +1,15 @@
 {
-    'name': 'Extensión RFID - Empleados',
+    'name': 'Maya-Attendance',
     'version': '1.0',
-    'summary': 'Añade ID de tarjeta RFID a la ficha del empleado',
-    'category': 'Human Resources',
-    'author': 'Tu Nombre / DAM',
+    'summary': 'Modulo Maya|Attendance',
     'depends': [
         'hr',
-        'maya_core', # CRÍTICO para evitar el error 500
+        'maya_core',
     ],
     'data': [
         'views/views.xml',
     ],
     'installable': True,
+    'application': True,
     'license': 'LGPL-3',
 }
