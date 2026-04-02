@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_employee_form_inherit_rfid" model="ir.ui.view">
+    
+    <record id="view_employee_form_inherit_rfid" model="ir.ui.view"> 
         <field name="name">maya_core.employee.form.rfid</field>
         <field name="model">maya_core.employee</field>
+        <!-- vista del formulario -->
         <field name="inherit_id" ref="maya_core.employee_form"/> <field name="arch" type="xml">
-        
-            <xpath expr="//notebook" position="inside">
+            <!-- Seccion notebook para mostrar el godigo RFID -->
+            <xpath expr="//notebook" position="inside"> 
                 <page string="Acceso" name="access_tab">
                     <group>
                         <group string="ID Tarjeta RFID">
+                            <!-- Campo id_tarjeta_rfid -->
                             <field name="id_tarjeta_rfid"/>
                         </group>
                     </group>
