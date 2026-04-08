@@ -9,7 +9,6 @@ class MayaCoreEmployee(models.Model):
         index=True,     
         required = True
     )
-
     _sql_constraints = [ #Restricciones de la base de datos
         (
             'rfid_unique', 
