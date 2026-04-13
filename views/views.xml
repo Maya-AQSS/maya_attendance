@@ -1,60 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="maya_attendance.list">
-      <field name="name">maya_attendance list</field>
-      <field name="model">maya_attendance.maya_attendance</field>
-      <field name="arch" type="xml">
-        <list>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </list>
-      </field>
-    </record>
--->
+    <data>
+        <record id="view_employee_form_inherit_rfid" model="ir.ui.view"> 
+            <field name="name">maya_core.employee.form.rfid</field>
+            <field name="model">maya_core.employee</field>
+            <!-- vista del formulario -->
+            <field name="inherit_id" ref="maya_core.employee_form"/> <field name="arch" type="xml">
+                <!-- Seccion notebook para mostrar el godigo RFID -->
+                <xpath expr="//notebook" position="inside"> 
+                    <page string="Acceso" name="access_tab">
+                        <group>
+                            <group string="ID Tarjeta RFID">
+                                <!-- Campo id_tarjeta_rfid -->
+                                <field name="id_tarjeta_rfid"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
 
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="maya_attendance.action_window">
-      <field name="name">maya_attendance window</field>
-      <field name="res_model">maya_attendance.maya_attendance</field>
-      <field name="view_mode">list,form</field>
-    </record>
--->
+            </field>
+        </record>
 
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="maya_attendance.action_server">
-      <field name="name">maya_attendance server</field>
-      <field name="model_id" ref="model_maya_attendance_maya_attendance"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "list,form",
-          "res_model": model._name,
-        }
-      </field>
-    </record>
--->
-
-    <!-- Top menu item -->
-<!--
-    <menuitem name="maya_attendance" id="maya_attendance.menu_root"/>
--->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="maya_attendance.menu_1" parent="maya_attendance.menu_root"/>
-    <menuitem name="Menu 2" id="maya_attendance.menu_2" parent="maya_attendance.menu_root"/>
--->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="maya_attendance.menu_1_list" parent="maya_attendance.menu_1"
-              action="maya_attendance.action_window"/>
-    <menuitem name="Server to list" id="maya_attendance" parent="maya_attendance.menu_2"
-              action="maya_attendance.action_server"/>
--->
-  </data>
+        <record id="view_maya_attendance_list" model="ir.ui.view">
+            <field name="name">maya_attendance.attendance.list</field>
+            <field name="model">maya_attendance.attendance</field>
+            <field name="arch" type="xml">
+                <!-- lista con los registros de asistencia inmutables-->
+                <list string="Registros de Asistencia" 
+                    create="0" 
+                    edit="0" 
+                    delete="0" 
+                    default_order="employee_surname asc, check_time desc">
+                    <field name="check_date"/>
+                    <field name="check_time"/>
+                    <field name="employee_id"/>
+                    <field name="employee_surname" column_invisible="True"/> <field name="attendance_type" widget="badge" 
+                        decoration-success="attendance_type == 'I'" 
+                        decoration-warning="attendance_type == 'O'"/>
+                    <field name="location_id"/>
+                    <field name="terminal_id"/>
+                </list>
+            </field>
+        </record>
+        <!--Acciones-->
+        <record id="action_maya_attendance" model="ir.actions.act_window">
+            <field name="name">Asistencia</field>
+            <field name="res_model">maya_attendance.attendance</field>
+            <field name="view_mode">list</field>
+            <field name="context">{'group_by': 'check_date:day'}</field>
+            <field name="target">current</field>
+        </record>
+        <!--Menu-->
+        <menuitem id="menu_maya_attendance_root" name="Asistencia" sequence="10"/>
+        <menuitem id="menu_maya_attendance_records" name="Fichajes" parent="menu_maya_attendance_root" action="action_maya_attendance" sequence="10"/>
+    </data>
 </odoo>
