@@ -6,7 +6,7 @@ import json
 class MayaAttendance(http.Controller):
 
     #Funcion para buscar emplados a partir del codigo RFID
-    @http.route('/api/empleado/<string:codigo_rfid>', type='http', auth='none', website=True)
+    @http.route('/api/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
     def buscar_empleado(self, codigo_rfid, **kwargs):
         
         if not codigo_rfid.isdigit(): #Validacion numerica
@@ -32,6 +32,41 @@ class MayaAttendance(http.Controller):
             res = {
                 "status": "error",
                 "message": f"No existe empleado con tarjeta RFID {codigo_rfid}"
+            }
+
+        return request.make_response( #Y devolvemos un json con la informacion 
+            json.dumps(res),
+            headers=[('Content-Type', 'application/json')]
+        )
+
+    #Funcion para buscar emplados a partir de su dni
+    #TODO Implementar que se busque con din y constraseña
+    @http.route('/api/empleado_dni/<string:dni>', type='http', auth='none', website=True)
+    def buscar_empleado_por_dni(self, dni, **kwargs):
+        
+        if not dni.isdigit(): #Validacion numerica
+            return request.make_response(
+                json.dumps({"status": "error", "message": "El codigo debe ser un numero"}),
+                headers=[('Content-Type', 'application/json')]
+            )
+
+        #Buscamos el empleado a partir del modelo heredado
+        empleado = request.env['maya_core.employee'].sudo().search([
+            ('dni', '=', int(dni))
+        ], limit=1)
+
+        if empleado: #Si existe un empleado creamos un diccionario con su informacion
+            res = {
+                "status": "success",
+                "id_odoo": empleado.id,
+                "nombre": empleado.name,
+                "apellidos": empleado.surname,
+                "dni": empleado.dni
+            }
+        else: #Si no existe, mandamos un error
+            res = {
+                "status": "error",
+                "message": f"No existe empleado con el dni {dni}"
             }
 
         return request.make_response( #Y devolvemos un json con la informacion 
