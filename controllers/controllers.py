@@ -44,15 +44,15 @@ class MayaAttendance(http.Controller):
     @http.route('/api/empleado_dni/<string:dni>', type='http', auth='none', website=True)
     def buscar_empleado_por_dni(self, dni, **kwargs):
         
-        if not dni.isdigit(): #Validacion numerica
+        if dni.isdigit(): #Validacion numerica
             return request.make_response(
-                json.dumps({"status": "error", "message": "El codigo debe ser un numero"}),
+                json.dumps({"status": "error", "message": "El codigo debe ser alfanumerico"}),
                 headers=[('Content-Type', 'application/json')]
             )
 
         #Buscamos el empleado a partir del modelo heredado
         empleado = request.env['maya_core.employee'].sudo().search([
-            ('dni', '=', int(dni))
+            ('dni', '=', dni)
         ], limit=1)
 
         if empleado: #Si existe un empleado creamos un diccionario con su informacion
