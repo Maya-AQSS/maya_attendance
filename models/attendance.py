@@ -44,7 +44,7 @@ class MayaAttendance(models.Model):
     ], string='Tipo', required=True)
 
     # Campo para guardar el id
-    terminal_id = fields.Integer(string='ID Terminal', required=True)
+    terminal_id = fields.Char(string='ID Terminal', required=True)
     
     # Campo para guardar la localizacion
     location_id = fields.Many2one(
