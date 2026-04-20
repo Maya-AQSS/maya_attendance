@@ -46,7 +46,7 @@ class MayaAttendance(http.Controller):
         
         if dni.isdigit(): #Validacion numerica
             return request.make_response(
-                json.dumps({"status": "error", "message": "El codigo debe ser alfanumerico"}),
+                json.dumps({"status": "error", "message": "Error, introduce la letra"}),
                 headers=[('Content-Type', 'application/json')]
             )
 
