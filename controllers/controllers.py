@@ -79,28 +79,28 @@ class MayaAttendance(http.Controller):
         # En Odoo 19, los datos ya vienen en el diccionario 'post'
         # No hace falta usar request.jsonrequest
         # Artibutos sacados del json
-        rfid_code = post.get('rfid_code')
+        employee_id = post.get('employee_id')
         attendance_type = post.get('type')
         terminal_id = post.get('terminal_id')
         location_id = post.get('location_id')
 
         # Condicion para comprobar si estan todos los valores necesarios
-        if not rfid_code or not attendance_type or not terminal_id or not location_id:
+        if not employee_id or not attendance_type or not terminal_id or not location_id:
             return {'status': 'error', 'message': 'Faltan parámetros obligatorios'}
 
         #   Creacion de una instancia empleado a partir de una busqueda en odoo
         employee = request.env['maya_core.employee'].sudo().search([
-            ('id_tarjeta_rfid', '=', rfid_code)
+            ('employee_id', '=', employee_id)
         ], limit=1)
          
         # Si despues de la busqueda no se ha encontrado el empleado devolvemos error
         if not employee:
-            return {'status': 'error', 'message': 'Tarjeta RFID no reconocida'}
+            return {'status': 'error', 'message': 'Empleado no encontrado'}
 
         # Metemos los datos en el modelo de maya_attendance
         try:
             new_attendance = request.env['maya_attendance.attendance'].sudo().create({
-                'employee_id': employee.id,
+                'employee_id': employee_id,
                 'attendance_type': attendance_type,
                 'terminal_id': terminal_id,
                 'location_id': location_id,
