@@ -76,39 +76,42 @@ class MayaAttendance(http.Controller):
 
     @http.route('/api/v1/attendance/log', type='json', auth='none', methods=['POST'], csrf=False)
     def log_attendance(self, **post):
-        # En Odoo 19, los datos ya vienen en el diccionario 'post'
-        # No hace falta usar request.jsonrequest
-        # Artibutos sacados del json
+        # Extraemos los datos del diccionario
         employee_id = post.get('employee_id')
         attendance_type = post.get('type')
         terminal_id = post.get('terminal_id')
         location_id = post.get('location_id')
 
-        # Condicion para comprobar si estan todos los valores necesarios
-        if not employee_id or not attendance_type or not terminal_id or not location_id:
+        # Comprobamos si están todos los valores
+        if not all([employee_id, attendance_type, terminal_id, location_id]):
             return {'status': 'error', 'message': 'Faltan parámetros obligatorios'}
 
-        #   Creacion de una instancia empleado a partir de una busqueda en odoo
-        employee = request.env['maya_core.employee'].sudo().search([
-            ('employee_id', '=', employee_id)
-        ], limit=1)
-         
-        # Si despues de la busqueda no se ha encontrado el empleado devolvemos error
-        if not employee:
-            return {'status': 'error', 'message': 'Empleado no encontrado'}
-
-        # Metemos los datos en el modelo de maya_attendance
         try:
-            new_attendance = request.env['maya_attendance.attendance'].sudo().create({
-                'employee_id': employee_id,
+            # Buscamos al empleado y guardamos el objeto en la variable
+            employee = request.env['maya_core.employee'].sudo().browse(int(employee_id))
+            
+            # Comprobamos si el objeto existe de verdad en la base de datos
+            if not employee.exists():
+                return {'status': 'error', 'message': 'Empleado no encontrado'}
+            
+            
+        except (ValueError, TypeError):
+            return {'status': 'error', 'message': 'ID de empleado no válido'}
+
+    
+        try:
+            # Finalmente devolvemos todos los valores
+            request.env['maya_attendance.attendance'].sudo().create({
+                'employee_id': employee.id,  # Usamos el ID del objeto que hemos validado
                 'attendance_type': attendance_type,
                 'terminal_id': terminal_id,
                 'location_id': location_id,
             })
+            
             return {
                 'status': 'success',
-                'employee_name': employee.name,
-                'message': 'Fichaje registrado'
+                'message': 'Fichaje registrado correctamente'
             }
         except Exception as e:
+            # Si falla algo en la DB (constraints, etc.), capturamos el error
             return {'status': 'error', 'message': str(e)}
