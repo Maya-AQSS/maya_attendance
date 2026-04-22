@@ -39,7 +39,10 @@ class MayaAttendance(models.Model):
     )
 
     #Campo hora que muestra solo la hora
-    check_time_only = fields.Char(compute="_compute_time")
+    check_time_only = fields.Char(
+        string='Hora del Fichaje',
+        compute="_compute_time"
+    )
 
     # Campo para seleccionar el tipo de fichaje
     attendance_type = fields.Selection([
