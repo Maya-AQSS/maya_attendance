@@ -1,6 +1,7 @@
 from odoo import http
 from odoo.http import request
 import json
+from odoo.fields import Datetime
 
 #Api para la conexion entre la base de datos y maya-time-gate
 class MayaAttendance(http.Controller):
@@ -115,3 +116,38 @@ class MayaAttendance(http.Controller):
         except Exception as e:
             # Si falla algo en la DB (constraints, etc.), capturamos el error
             return {'status': 'error', 'message': str(e)}
+
+    
+    def calcular_fichaje_doble(self, ultimo_fichaje):
+        hora_actual = Datetime.now()
+        duracion = hora_actual - ultimo_fichaje
+
+        return duracion.total_seconds() < 300
+
+    @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
+    def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):
+        
+
+        #Buscamos el empleado en la tabla de asistencia y cojemos su ultimo fichaje
+        attendance = request.env['maya_attendance.attendance'].sudo().search([
+            ('employee_id', '=', employee_id)
+        ], order='check_time desc', limit=1)
+
+        if attendance: #Si existe un empleado creamos un diccionario con su informacion
+            es_doble = self.calcular_fichaje_doble(attendance.check_time)
+            res = {
+                "status": "success",
+                "id_odoo": attendance.employee_id.id,
+                "fichaje_doble": es_doble
+
+            }
+        else: #Si no existe, mandamos un error
+            res = {
+                "status": "error",
+                "message": f"No existe empleado con el id {employee_id}"
+            }
+
+        return request.make_response( #Y devolvemos un json con la informacion 
+            json.dumps(res),
+            headers=[('Content-Type', 'application/json')]
+        )
