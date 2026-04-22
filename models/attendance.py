@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
+from datetime import datetime
 
 class MayaAttendance(models.Model):
     # Nombre y descripcion del modelo
@@ -37,6 +38,9 @@ class MayaAttendance(models.Model):
         default=fields.Datetime.now
     )
 
+    #Campo hora que muestra solo la hora
+    check_time_only = fields.Char(compute="_compute_time")
+
     # Campo para seleccionar el tipo de fichaje
     attendance_type = fields.Selection([
         ('I', 'Entrada'),
@@ -52,3 +56,11 @@ class MayaAttendance(models.Model):
         string='Ubicación', 
         required=True
     )
+    
+    # Calcula la hora actual
+    def _compute_time(self):
+        for rec in self:
+            rec.check_time_only = (
+                rec.check_time.strftime("%H:%M")
+                if rec.check_time else ""
+            )

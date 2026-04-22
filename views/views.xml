@@ -32,7 +32,7 @@
                     delete="0" 
                     default_order="employee_surname asc, check_time desc">
                     <field name="check_date"/>
-                    <field name="check_time"/>
+                    <field name="check_time_only"/>
                     <field name="employee_id"/>
                     <field name="employee_surname" column_invisible="True"/> <field name="attendance_type" widget="badge" 
                         decoration-success="attendance_type == 'I'" 
