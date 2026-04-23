@@ -9,16 +9,10 @@ class MayaAttendance(http.Controller):
     #Funcion para buscar emplados a partir del codigo RFID
     @http.route('/api/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
     def buscar_empleado(self, codigo_rfid, **kwargs):
-        
-        if not codigo_rfid.isdigit(): #Validacion numerica
-            return request.make_response(
-                json.dumps({"status": "error", "message": "El codigo debe ser un numero"}),
-                headers=[('Content-Type', 'application/json')]
-            )
 
         #Buscamos el empleado a partir del modelo heredado
         empleado = request.env['maya_core.employee'].sudo().search([
-            ('id_tarjeta_rfid', '=', int(codigo_rfid))
+            ('id_tarjeta_rfid', '=', codigo_rfid)
         ], limit=1)
 
         if empleado: #Si existe un empleado creamos un diccionario con su informacion
@@ -122,7 +116,8 @@ class MayaAttendance(http.Controller):
         hora_actual = Datetime.now()
         duracion = hora_actual - ultimo_fichaje
 
-        return duracion.total_seconds() < 300
+        #return duracion.total_seconds() < 300
+        return duracion.total_seconds() <60
 
     @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):

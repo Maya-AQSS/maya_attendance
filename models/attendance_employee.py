@@ -3,7 +3,7 @@ from odoo import models, fields
 class MayaCoreEmployee(models.Model):
     _inherit = 'maya_core.employee' #Hereda de employee de maya_core
 
-    id_tarjeta_rfid = fields.Integer( #Campo integer para el codigo RFID
+    id_tarjeta_rfid = fields.Char( #Campo Char para el codigo RFID
         string='ID Tarjeta RFID',
         help="Identificador físico de la tarjeta para poder fichar",
         index=True,     
