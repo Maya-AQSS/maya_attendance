@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from datetime import datetime
+from odoo.fields import Datetime
 
 class MayaAttendance(models.Model):
     # Nombre y descripcion del modelo
@@ -63,7 +64,9 @@ class MayaAttendance(models.Model):
     # Calcula la hora actual
     def _compute_time(self):
         for rec in self:
-            rec.check_time_only = (
-                rec.check_time.strftime("%H:%M")
-                if rec.check_time else ""
-            )
+            if rec.check_time:
+                # Convertimos la hora de UTC a la zona horaria del contexto del usuario
+                local_time = Datetime.context_timestamp(self, rec.check_time)
+                rec.check_time_only = local_time.strftime("%H:%M")
+            else:
+                rec.check_time_only = ""
