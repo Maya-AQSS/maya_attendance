@@ -116,8 +116,7 @@ class MayaAttendance(http.Controller):
         hora_actual = Datetime.now()
         duracion = hora_actual - ultimo_fichaje
 
-        #return duracion.total_seconds() < 300
-        return duracion.total_seconds() <60
+        return duracion.total_seconds() < 300
 
     @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):
