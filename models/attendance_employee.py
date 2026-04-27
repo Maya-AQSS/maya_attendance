@@ -14,5 +14,10 @@ class MayaCoreEmployee(models.Model):
             'rfid_unique', 
             'unique(id_tarjeta_rfid)', 
             'Error: El ID de tarjeta RFID ya está asignado a otro empleado.'
+        ),
+         (
+            'dni_unique',
+            'unique(dni)',
+            'El DNI ya está registrado.'
         )
     ]
