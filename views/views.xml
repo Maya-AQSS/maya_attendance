@@ -10,10 +10,9 @@
                 <xpath expr="//notebook" position="inside"> 
                     <page string="Acceso" name="access_tab">
                         <group>
-                            <group>
-                                <!-- Campo id_tarjeta_rfid -->
-                                <field name="id_tarjeta_rfid"/>
-                            </group>
+                            <!-- Campo id_tarjeta_rfid -->
+                            <field name="id_tarjeta_rfid"/>
+                            <field name="id_rfid_decimal"/>
                         </group>
                     </page>
                 </xpath>
