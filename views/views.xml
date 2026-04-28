@@ -1,19 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="view_employee_form_inherit_rfid" model="ir.ui.view"> 
+        <record id="view_employee_form_inherit_rfid" model="ir.ui.view">
             <field name="name">maya_core.employee.form.rfid</field>
             <field name="model">maya_core.employee</field>
-            <!-- vista del formulario -->
-            <field name="inherit_id" ref="maya_core.employee_form"/> <field name="arch" type="xml">
-                <!-- Seccion notebook para mostrar el godigo RFID -->
-                <xpath expr="//notebook" position="inside"> 
+            <field name="inherit_id" ref="maya_core.employee_form" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//notebook" position="inside">
                     <page string="Acceso" name="access_tab">
+
+                        <!-- Botones para editar el codigo rfid-->
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_toggle_edit"
+                                string="Editar"
+                                type="object"
+                                class="btn-primary"
+                                invisible="esta_editando == True" />
+
+                            <button name="action_toggle_edit"
+                                string="Guardar"
+                                type="object"
+                                class="btn-secondary"
+                                invisible="esta_editando == False" />
+                        </div>
+
+                        <!-- Codigos rfid -->
                         <group>
-                            <!-- Campo id_tarjeta_rfid -->
-                            <field name="id_tarjeta_rfid"/>
-                            <field name="id_rfid_decimal"/>
+                            <!-- <field name="esta_editando" invisible="1" /> -->
+
+
+                            <field name="id_tarjeta_rfid" readonly="not esta_editando" />
+                            <field name="id_rfid_decimal" />
+
                         </group>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_employee_form_inherit_attendance" model="ir.ui.view">
+            <field name="name">maya_core.employee.form.attendance</field>
+            <field name="model">maya_core.employee</field>
+            <field name="inherit_id" ref="maya_core.employee_form" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//notebook" position="inside">
+                    <page string="Historial de Fichajes" name="attendance_tab">
+                        <field name="attendance_ids" readonly="1">
+                            <list limit="10" default_order="check_time desc">
+                                <field name="check_date" />
+                                <field name="check_time_only" />
+                                <field name="attendance_type" widget="badge"
+                                    decoration-success="attendance_type == 'I'"
+                                    decoration-warning="attendance_type == 'O'" />
+                                <field name="location_id" />
+                                <field name="terminal_id" />
+                            </list>
+                        </field>
                     </page>
                 </xpath>
 
@@ -25,19 +70,20 @@
             <field name="model">maya_attendance.attendance</field>
             <field name="arch" type="xml">
                 <!-- lista con los registros de asistencia inmutables-->
-                <list string="Registros de Asistencia" 
-                    create="0" 
-                    edit="0" 
-                    delete="0" 
+                <list string="Registros de Asistencia"
+                    create="0"
+                    edit="0"
+                    delete="0"
                     default_order="employee_surname asc, check_time desc">
-                    <field name="check_date"/>
-                    <field name="check_time_only"/>
-                    <field name="employee_id"/>
-                    <field name="employee_surname" column_invisible="True"/> <field name="attendance_type" widget="badge" 
-                        decoration-success="attendance_type == 'I'" 
-                        decoration-warning="attendance_type == 'O'"/>
-                    <field name="location_id"/>
-                    <field name="terminal_id"/>
+                    <field name="check_date" />
+                    <field name="check_time_only" />
+                    <field name="employee_id" />
+                    <field name="employee_surname" column_invisible="True" />
+                    <field name="attendance_type" widget="badge"
+                        decoration-success="attendance_type == 'I'"
+                        decoration-warning="attendance_type == 'O'" />
+                    <field name="location_id" />
+                    <field name="terminal_id" />
                 </list>
             </field>
         </record>
@@ -50,7 +96,8 @@
             <field name="target">current</field>
         </record>
         <!--Menu-->
-        <menuitem id="menu_maya_attendance_root" name="Asistencia" sequence="10"/>
-        <menuitem id="menu_maya_attendance_records" name="Fichajes" parent="menu_maya_attendance_root" action="action_maya_attendance" sequence="10"/>
+        <menuitem id="menu_maya_attendance_root" name="Asistencia" sequence="10" />
+        <menuitem id="menu_maya_attendance_records" name="Fichajes"
+            parent="menu_maya_attendance_root" action="action_maya_attendance" sequence="10" />
     </data>
 </odoo>
