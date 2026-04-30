@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="view_employee_form_inherit_rfid" model="ir.ui.view">
-            <field name="name">maya_core.employee.form.rfid</field>
+
+        <record id="view_employee_form_inherit_custom" model="ir.ui.view">
+            <field name="name">maya_core.employee.form.custom</field>
             <field name="model">maya_core.employee</field>
             <field name="inherit_id" ref="maya_core.employee_form" />
             <field name="arch" type="xml">
@@ -10,44 +11,28 @@
                 <xpath expr="//notebook" position="inside">
                     <page string="Acceso" name="access_tab">
 
-                        <!-- Botones para editar el codigo rfid-->
-                        <div class="oe_button_box" name="button_box">
-                            <button name="action_toggle_edit"
-                                string="Editar"
-                                type="object"
-                                class="btn-primary"
-                                invisible="esta_editando == True" />
+                        <button name="action_toggle_edit"
+                            string="Editar"
+                            type="object"
+                            class="btn-primary"
+                            invisible="esta_editando == True" />
 
-                            <button name="action_toggle_edit"
-                                string="Guardar"
-                                type="object"
-                                class="btn-secondary"
-                                invisible="esta_editando == False" />
-                        </div>
+                        <button name="action_toggle_edit"
+                            string="Guardar"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="esta_editando == False" />
 
-                        <!-- Codigos rfid -->
                         <group>
-                            <!-- <field name="esta_editando" invisible="1" /> -->
+                            <field name="id_tarjeta_rfid"
+                                readonly="not esta_editando"
+                                string="Código RFID" />
 
-
-                            <field name="id_tarjeta_rfid" readonly="not esta_editando" />
-                            <field name="id_rfid_decimal" />
-
+                            <field name="id_rfid_decimal"
+                                string="Código RFID decimal" />
                         </group>
-                    </page>
-                </xpath>
 
-            </field>
-        </record>
 
-        <record id="view_employee_form_inherit_attendance" model="ir.ui.view">
-            <field name="name">maya_core.employee.form.attendance</field>
-            <field name="model">maya_core.employee</field>
-            <field name="inherit_id" ref="maya_core.employee_form" />
-            <field name="arch" type="xml">
-
-                <xpath expr="//notebook" position="inside">
-                    <page string="Historial de Fichajes" name="attendance_tab">
                         <field name="attendance_ids" readonly="1">
                             <list limit="10" default_order="check_time desc">
                                 <field name="check_date" />
@@ -59,18 +44,21 @@
                                 <field name="terminal_id" />
                             </list>
                         </field>
+
                     </page>
+
                 </xpath>
 
             </field>
         </record>
+
 
         <record id="view_maya_attendance_list" model="ir.ui.view">
             <field name="name">maya_attendance.attendance.list</field>
             <field name="model">maya_attendance.attendance</field>
             <field name="arch" type="xml">
                 <!-- lista con los registros de asistencia inmutables-->
-                <list string="Registros de Asistencia"
+                <list
                     create="0"
                     edit="0"
                     delete="0"
