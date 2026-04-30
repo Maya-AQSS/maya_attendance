@@ -13,7 +13,6 @@ class MayaCoreEmployee(models.Model):
     id_rfid_decimal = fields.Char( #Campo que guarda el codigo rfid en formato decimal
         string="ID Tarjeta RFID Decimal",
         compute="_compute_rfid", #Calculamos el codigo a partir del rfid en hexadecimal
-        store = True,
     )
 
     
@@ -22,7 +21,7 @@ class MayaCoreEmployee(models.Model):
     attendance_ids = fields.One2many(
         'maya_attendance.attendance', 
         'employee_id', 
-        string='Historial de Asistencias'
+        string ='Historial de fichajes'
     )
 
     def action_toggle_edit(self): #Funcion para cambiar el estado de edicion
