@@ -34,7 +34,7 @@
 
 
                         <field name="attendance_ids" readonly="1">
-                            <list limit="10" default_order="check_time desc">
+                            <list limit="10">
                                 <field name="check_date" />
                                 <field name="check_time_only" />
                                 <field name="attendance_type" widget="badge"
@@ -62,7 +62,7 @@
                     create="0"
                     edit="0"
                     delete="0"
-                    default_order="employee_surname asc, check_time desc">
+                    default_order="employee_surname asc, check_time asc">
                     <field name="check_date" />
                     <field name="check_time_only" />
                     <field name="employee_id" />
@@ -84,7 +84,8 @@
             <field name="target">current</field>
         </record>
         <!--Menu-->
-        <menuitem id="menu_maya_attendance_root" name="Asistencia" sequence="10" />
+    
+        <menuitem id="menu_maya_attendance_root" name="Maya | Asistencia" sequence="10" />
         <menuitem id="menu_maya_attendance_records" name="Fichajes"
             parent="menu_maya_attendance_root" action="action_maya_attendance" sequence="10" />
     </data>
