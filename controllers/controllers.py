@@ -118,27 +118,37 @@ class MayaAttendance(http.Controller):
 
         return duracion.total_seconds() < 300
 
+
     @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):
         
 
         #Buscamos el empleado en la tabla de asistencia y cojemos su ultimo fichaje
-        attendance = request.env['maya_attendance.attendance'].sudo().search([
-            ('employee_id', '=', employee_id)
-        ], order='check_time desc', limit=1)
+        # attendance = request.env['maya_attendance.attendance'].sudo().search([
+        #     ('employee_id', '=', employee_id)
+        # ], order='check_time desc', limit=1)
 
-        if attendance: #Si existe un empleado creamos un diccionario con su informacion
-            es_doble = self.calcular_fichaje_doble(attendance.check_time)
-            res = {
-                "status": "success",
-                "id_odoo": attendance.employee_id.id,
-                "fichaje_doble": es_doble
+        employee = request.env['maya_core.employee'].sudo().browse(employee_id)
 
-            }
-        else: #Si no existe, mandamos un error
+        if not employee.exists():
             res = {
                 "status": "error",
                 "message": f"No existe empleado con el id {employee_id}"
+            }
+        else:
+            attendance = request.env['maya_attendance.attendance'].sudo().search([
+                ('employee_id', '=', employee.id)
+            ], order='check_time desc', limit=1)
+
+            if attendance:
+                es_doble = self.calcular_fichaje_doble(attendance.check_time)
+            else:
+                es_doble = False
+
+            res = {
+                "status": "success",
+                "id_odoo": employee.id,
+                "fichaje_doble": es_doble
             }
 
         return request.make_response( #Y devolvemos un json con la informacion 
