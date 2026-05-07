@@ -3,13 +3,7 @@ from odoo.http import request
 import json
 from odoo.fields import Datetime
 from datetime import datetime
-import time
-from datetime import datetime
-import json
-from odoo import http
-from odoo import fields
-import json
-from odoo import http
+import pytz
 
 #Api para la conexion entre la base de datos y maya-time-gate
 class MayaAttendance(http.Controller):
@@ -125,7 +119,7 @@ class MayaAttendance(http.Controller):
         duracion = hora_actual - ultimo_fichaje
 
         return duracion.total_seconds() < 300
-        
+    
 
     # Funcion para comprobar si el fichaje es doble
     @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
@@ -216,4 +210,4 @@ class MayaAttendance(http.Controller):
             json.dumps(res),
             headers=[('Content-Type', 'application/json')]
         )
-    
+        
