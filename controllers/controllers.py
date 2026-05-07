@@ -119,7 +119,6 @@ class MayaAttendance(http.Controller):
         duracion = hora_actual - ultimo_fichaje
 
         return duracion.total_seconds() < 300
-    
 
     # Funcion para comprobar si el fichaje es doble
     @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
@@ -211,3 +210,35 @@ class MayaAttendance(http.Controller):
             headers=[('Content-Type', 'application/json')]
         )
         
+
+    @http.route('/api/buscar_estado_fichaje/<int:employee_id>', type='http', auth='none', website=True)
+    def buscar_ultimo_estado_fichaje(self, employee_id, **kwargs):
+        
+        # Buscamos al empleado a partir de su id
+        employee = request.env['maya_core.employee'].sudo().browse(employee_id) 
+
+        if not employee.exists(): # Si el empleado no existe devolvemos error
+            res = {
+                "status": "error",
+                "message": f"No existe empleado con el id {employee_id}"
+            }
+        else: # Si existe buscamos el ultimo fichaje del empleado
+            attendance = request.env['maya_attendance.attendance'].sudo().search([
+                ('employee_id', '=', employee.id)
+            ], order='check_time desc', limit=1)
+
+            if attendance: # Si el fichaje existe
+                # Usamos la funcion para calcular si el fichaje es doble 
+                estado = attendance.attendance_type == "I"
+            else: # Si no se encuentra fichaje devolvemos falso
+                estado = False
+
+            res = { # Creamos la respuesta en formato json 
+                "status": "success",
+                "tipo_fichaje": estado
+            }
+
+        return request.make_response( #Y devolvemos un json con la informacion 
+            json.dumps(res),
+            headers=[('Content-Type', 'application/json')]
+        )
