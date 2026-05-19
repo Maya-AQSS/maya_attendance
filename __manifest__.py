@@ -5,10 +5,14 @@
     'depends': [
         'hr',
         'maya_core',
+        #'website',
+        'project',
     ],
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
+        'views/templates.xml',  
+        'views/config_settings_view.xml',
     ],
     'installable': True,
     'license': 'LGPL-3',
