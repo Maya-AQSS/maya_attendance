@@ -119,6 +119,7 @@ class MayaAttendance(http.Controller):
         duracion = hora_actual - ultimo_fichaje
 
         return duracion.total_seconds() < 300
+        
 
     # Funcion para comprobar si el fichaje es doble
     @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
@@ -198,10 +199,11 @@ class MayaAttendance(http.Controller):
                 "fichaje_tarde": fichaje_tarde,
                 "hora": hora
             }
-        else: # Si la sesion no existe mandamos error
+        else: #Si no hay sesiones
             res = {
-                "status": "error", 
-                "message": "Error, no hay sesiones"
+                "status": "success", 
+                "fichaje_tarde": False,
+                "hora": 0
             }
            
 
