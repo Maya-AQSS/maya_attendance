@@ -194,13 +194,13 @@ class MayaAttendance(http.Controller):
         
         if session.exists(): # Si la sesion existe
             
-            fichaje_tarde, hora, sesion = self.calcular_fichaje_tarde(session) # Variable que guarda si llega tarde
+            fichaje_tarde, hora_actual, hora_inicio_sesion = self.calcular_fichaje_tarde(session) # Variable que guarda si llega tarde
 
             res = { # Json de respuesta
                 "status": "success",
                 "fichaje_tarde": fichaje_tarde,
-                "hora": hora,
-                "hora ultima sesion":sesion
+                "hora": hora_actual,
+                "hora ultima sesion":hora_inicio_sesion
             }
         else: #Si no hay sesiones
             res = {

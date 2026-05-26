@@ -14,6 +14,7 @@
         'views/templates.xml',  
         'views/config_settings_view.xml',
     ],
+    'application': True,
     'installable': True,
     'license': 'LGPL-3',
 }

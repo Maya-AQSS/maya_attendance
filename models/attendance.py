@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
+from datetime import datetime
+from odoo.fields import Datetime
 
 class MayaAttendance(models.Model):
     # Nombre y descripcion del modelo
@@ -19,7 +21,7 @@ class MayaAttendance(models.Model):
         related='employee_id.surname', 
         string='Apellido Empleado', 
         store=True, 
-        index=True,
+        index=True
     )
 
     # Campo fecha
@@ -37,6 +39,12 @@ class MayaAttendance(models.Model):
         default=fields.Datetime.now
     )
 
+    #Campo hora que muestra solo la hora
+    check_time_only = fields.Char(
+        string='Hora del Fichaje',
+        compute="_compute_time"
+    )
+
     # Campo para seleccionar el tipo de fichaje
     attendance_type = fields.Selection([
         ('I', 'Entrada'),
@@ -44,7 +52,7 @@ class MayaAttendance(models.Model):
     ], string='Tipo', required=True)
 
     # Campo para guardar el id
-    terminal_id = fields.Integer(string='ID Terminal', required=True)
+    terminal_id = fields.Char(string='ID Terminal', required=True)
     
     # Campo para guardar la localizacion
     location_id = fields.Many2one(
@@ -52,3 +60,13 @@ class MayaAttendance(models.Model):
         string='Ubicación', 
         required=True
     )
+    
+    # Calcula la hora actual
+    def _compute_time(self):
+        for rec in self:
+            if rec.check_time:
+                # Convertimos la hora de UTC a la zona horaria del contexto del usuario
+                local_time = Datetime.context_timestamp(self, rec.check_time)
+                rec.check_time_only = local_time.strftime("%H:%M")
+            else:
+                rec.check_time_only = ""
