@@ -178,7 +178,7 @@ class MayaAttendance(http.Controller):
         hora_actual = self.calcular_hora_float()
         hora_sesion = session.start_time  # ya es float
 
-        return hora_actual > hora_sesion, hora_actual
+        return hora_actual > hora_sesion, hora_actual, hora_sesion
 
     # Funcion para comprobar si se ha fichado despues del comienzo de la ultima sesion
     @http.route('/api/comprobar_sesion', type = 'http', auth='none', website=True)
@@ -188,18 +188,19 @@ class MayaAttendance(http.Controller):
         
         session = request.env['maya_core.session_schedule'].sudo().search(
             [('week_day', 'ilike', dia_semana)],
-            order='create_date desc',
+            order='start_time desc',
             limit=1
         )   # Consulta para calcular la ultima sesion del dia actual
         
         if session.exists(): # Si la sesion existe
             
-            fichaje_tarde, hora = self.calcular_fichaje_tarde(session) # Variable que guarda si llega tarde
+            fichaje_tarde, hora, sesion = self.calcular_fichaje_tarde(session) # Variable que guarda si llega tarde
 
             res = { # Json de respuesta
                 "status": "success",
                 "fichaje_tarde": fichaje_tarde,
-                "hora": hora
+                "hora": hora,
+                "hora ultima sesion":sesion
             }
         else: #Si no hay sesiones
             res = {

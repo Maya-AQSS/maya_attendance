@@ -19,7 +19,7 @@ class MayaAttendance(models.Model):
         related='employee_id.surname', 
         string='Apellido Empleado', 
         store=True, 
-        index=True
+        index=True,
     )
 
     # Campo fecha
