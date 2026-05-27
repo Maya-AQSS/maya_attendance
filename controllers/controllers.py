@@ -13,7 +13,7 @@ class MayaAttendance(http.Controller):
 
         #Buscamos el empleado a partir del modelo heredado
         empleado = request.env['maya_core.employee'].sudo().search([
-            ('id_tarjeta_rfid', '=', codigo_rfid)
+            ('id_card_rfid', '=', codigo_rfid)
         ], limit=1)
 
         if empleado: #Si existe un empleado creamos un diccionario con su informacion

@@ -4,7 +4,7 @@ class MayaCoreEmployee(models.Model):
     _inherit = 'maya_core.employee' #Hereda de employee de maya_core
 
 
-    id_tarjeta_rfid = fields.Char( #Campo Char para el codigo RFID
+    id_card_rfid = fields.Char( #Campo Char para el codigo RFID
         string='ID Tarjeta RFID',
         help="Identificador físico de la tarjeta para poder fichar",
         index=True,     
@@ -16,7 +16,7 @@ class MayaCoreEmployee(models.Model):
     )
 
     
-    esta_editando = fields.Boolean(default=False) # El "interruptor"
+    is_editing = fields.Boolean(default=False) # El "interruptor"
 
     attendance_ids = fields.One2many(
         'maya_attendance.attendance', 
@@ -26,29 +26,21 @@ class MayaCoreEmployee(models.Model):
 
     def action_toggle_edit(self): #Funcion para cambiar el estado de edicion
         for record in self:
-            record.esta_editando = not record.esta_editando
+            record.is_editing = not record.is_editing
 
-    @api.depends("id_tarjeta_rfid") #Funcion para calcular el codigo rfid en decimal
+    @api.depends("id_card_rfid") #Funcion para calcular el codigo rfid en decimal
     def _compute_rfid(self):
         for record in self:
-            if record.id_tarjeta_rfid and isinstance(record.id_tarjeta_rfid, str):
+            if record.id_card_rfid and isinstance(record.id_card_rfid, str):
                 # Si el codigo es string calculamos de hexadecimal a decimal el codigo
                 try:
-                    record.id_rfid_decimal = int(record.id_tarjeta_rfid, 16)
+                    record.id_rfid_decimal = int(record.id_card_rfid, 16)
                 except:
                     record.id_rfid_decimal = "0"
             else:
                 record.id_rfid_decimal = 0
 
-    _sql_constraints = [ #Restricciones de la base de datos
-        (
-            'rfid_unique', 
-            'unique(id_tarjeta_rfid)', 
-            'Error: El ID de tarjeta RFID ya está asignado a otro empleado.'
-        ),
-         (
-            'dni_unique',
-            'unique(dni)',
-            'El DNI ya está registrado.'
-        )
-    ]
+    #Restricciones de la base de datos
+    _unique_rfid = models.Constraint('unique(id_card_rfid)', 'El ID de tarjeta RFID ya está asignado a otro empleado.')
+    _unique_dni = models.Constraint('unique(dni)', 'El DNI ya está registrado.')
+    
