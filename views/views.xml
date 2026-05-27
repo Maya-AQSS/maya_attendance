@@ -15,17 +15,17 @@
                             string="Editar"
                             type="object"
                             class="btn-primary"
-                            invisible="esta_editando == True" />
+                            invisible="is_editing == True" />
 
                         <button name="action_toggle_edit"
                             string="Guardar"
                             type="object"
                             class="btn-secondary"
-                            invisible="esta_editando == False" />
+                            invisible="is_editing == False" />
 
                         <group>
-                            <field name="id_tarjeta_rfid"
-                                readonly="not esta_editando"
+                            <field name="id_card_rfid"
+                                readonly="not is_editing"
                                 string="Código RFID" />
 
                             <field name="id_rfid_decimal"
