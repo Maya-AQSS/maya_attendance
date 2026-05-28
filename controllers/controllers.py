@@ -248,36 +248,6 @@ class MayaAttendance(http.Controller):
             headers=[('Content-Type', 'application/json')]
         )
 
-    # @http.route('api/cambiar_hora_fichaje', type='json', auth='none', methods=['POST'], csrf=False)
-    # def cambiar_hora_fichaje(self, **post): # Funcion para cambiar la hora del fichaje
-    #         employee_id = post.get("employee_id")
-    #         last_hour = post.get("last_hour")
-    #         new_hour = post.get("new_hour")
-
-    #         if not all([employee_id, last_hour, new_hour]):
-    #             return {"status": "error", "message": "Faltan parametros"}
-            
-    #         try:
-    #             employee = request.env["maya_attendance.attendance"].sudo().search([
-    #                 ('employee_id', '=', int(employee_id)),
-    #                 ('check_time', '=', float(last_hour))
-    #             ], limit=1)
-    #             if not employee.exists():
-    #                 return {"status": "error", "message": "Emoleado no encontrado"}
-
-
-    #             employee.write({
-    #                 'check_time': new_hour,
-    #             })
-                
-    #             return {
-    #                 'status': 'success',
-    #                 'message': 'Hora cambiada correctamente'
-    #             }
-
-    #         except (ValueError, TypeError):
-    #             return {"status": "error", "message": "ID de empleado no valido"}
-
 
     # @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
     # def attendance_pause(self, **post):
@@ -407,41 +377,3 @@ class MayaAttendance(http.Controller):
                 "status": "error",
                 "message": "Datos inválidos"
             }
-
-
-
-
-    @http.route(
-        '/api/obtener_fichajes_empleado',
-        type='json',
-        auth='none',
-        methods=['POST'],
-        csrf=False
-    )
-    def obtener_fichajes_empleado(self, **post):
-
-        data = post.get("params", post)
-
-        employee_id = data.get("employee_id")
-
-        fichajes = request.env[
-            "maya_attendance.attendance"
-        ].sudo().search([
-
-            ('employee_id', '=', int(employee_id))
-
-        ], order="check_time asc")
-
-        resultado = []
-
-        for f in fichajes:
-
-            resultado.append({
-
-                "datetime": str(f.check_time),   # usarás esto para buscar
-                "hora": f.check_time_only,       # solo para mostrar
-                "tipo": f.attendance_type
-
-            })
-
-        return resultado
