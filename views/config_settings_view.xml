@@ -1,0 +1,37 @@
+<odoo>
+    <data>
+
+        <!-- Vista de configuración -->
+        <record id="res_config_settings_view_form_maya_attendance"
+                model="ir.ui.view">
+
+            <field name="name">res.config.settings.view.form.maya.attendance</field>
+
+            <field name="model">res.config.settings</field>
+
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+
+            <field name="arch" type="xml">
+
+                <xpath expr="//app[@name='general_settings']" position="after">
+
+                    <app string="Maya | Attendance" name="maya_attendance">
+
+                        <block title="Fichaje doble">
+
+                            <setting string="Tiempo fichaje doble (En segundos)">
+                                <field name="double_signing_time"/>
+                            </setting>
+
+                        </block>
+
+                    </app>
+
+                </xpath>
+
+            </field>
+
+        </record>
+
+    </data>
+</odoo>
