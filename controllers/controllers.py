@@ -318,7 +318,7 @@ class MayaAttendance(http.Controller):
     #         return {"status": "error", "message": f"Error interno: {str(e)}"}
 
 
-    @http.route(
+    @http.route( #Endpoint para cambiar la hora del fichje del empleado
         '/api/cambiar_hora_fichaje',
         type='json',
         auth='none',
@@ -326,20 +326,21 @@ class MayaAttendance(http.Controller):
         csrf=False
     )
     def cambiar_hora_fichaje(self, **post):
-        #Crear una api que devuelva la fecha exacta
-        # 🔑 leer API key desde headers
-        if request.httprequest.headers.get('api-key') != "pass":
+        #Key api para evitar que cualquiera utilice la api
+        if request.httprequest.headers.get('api-key') != "pass": 
             return {
                 "status": "error",
                 "message": "No autorizado"
             }
 
+        # Se consigen los elementos del JSON enviado
         employee_id = post.get("employee_id")
         last_hour = post.get("last_hour")
         new_hour = post.get("new_hour")
         type = post.get("type")
 
-        if not all([employee_id, last_hour, new_hour]):
+        #Se comprueben que esten todos
+        if not all([employee_id, last_hour, new_hour, type]): 
             return {
                 "status": "error",
                 "message": "Faltan parámetros"
@@ -350,6 +351,8 @@ class MayaAttendance(http.Controller):
 
             start = base_time.replace(second=0)
             end = start + timedelta(minutes=1)
+
+            #Se consigue el empleado
             attendance = request.env["maya_attendance.attendance"].sudo().search([
                 ('employee_id', '=', int(employee_id)),
                 ('check_time', '>=', start),
@@ -363,7 +366,7 @@ class MayaAttendance(http.Controller):
                     "message": "Fichaje no encontrado"
                 }
 
-            attendance.write({
+            attendance.write({ # se cambia su hora de fichaje
                 'check_time': new_hour
             })
 
@@ -372,7 +375,7 @@ class MayaAttendance(http.Controller):
                 "message": "Hora cambiada correctamente"
             }
 
-        except (ValueError, TypeError):
+        except (ValueError, TypeError): #Se captura la excepcion por si hay algun error
             return {
                 "status": "error",
                 "message": "Datos inválidos"
