@@ -42,6 +42,10 @@
                                     decoration-warning="attendance_type == 'O'" />
                                 <field name="location_id" />
                                 <field name="terminal_id" />
+                                <field name="justification"
+                                    invisible="attendance_type != 'P'"/>
+                                <field name="total_time"
+                                    invisible="attendance_type != 'P'"/>
                             </list>
                         </field>
 
@@ -72,6 +76,10 @@
                         decoration-warning="attendance_type == 'O'" />
                     <field name="location_id" />
                     <field name="terminal_id" />
+                    <field name="justification"
+                                    invisible="attendance_type != 'P'"/>
+                    <field name="total_time"
+                                    invisible="attendance_type != 'P'"/>
                 </list>
             </field>
         </record>

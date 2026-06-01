@@ -170,7 +170,8 @@ class MayaAttendance(http.Controller):
         return now.hour + (now.minute / 60)
 
     def calcular_hora_minutos(self):
-        now = self.get_now_madrid()
+        tz = pytz.timezone("Europe/Madrid")
+        now = datetime.now(pytz.utc).astimezone(tz)
         return now.hour * 60 + now.minute
 
 
@@ -249,75 +250,6 @@ class MayaAttendance(http.Controller):
         )
 
 
-    # @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
-    # def attendance_pause(self, **post):
-    #     employee_id = post.get("employee_id")
-    #     reason = post.get("reason", "break") # Por defecto 'break', puede ser 'lunch', 'pharmacy', etc.
-    #     current_time = post.get("current_time") # La hora actual enviada por el dispositivo/app
-
-    #     if not all([employee_id, current_time]):
-    #         return {"status": "error", "message": "Faltan parametros obligatorios (employee_id, current_time)"}
-
-    #     try:
-    #         # Buscamos el último fichaje activo de este empleado (que no tenga hora de salida real)
-    #         attendance = request.env["maya_attendance.attendance"].sudo().search([
-    #             ('employee_id', '=', int(employee_id)),
-    #             # ('check_out', '=', False) 
-    #         ], limit=1, order='id desc')
-
-    #         if not attendance.exists():
-    #             return {"status": "error", "message": "No se encontro un fichaje activo para este empleado"}
-
-    #         # MODIFICAMOS EL REGISTRO: Marcamos que salió temporalmente
-    #         attendance.write({
-    #             'is_on_break': True,        # Campo hipotético para saber si está en pausa
-    #             'break_reason': reason,    # Guardamos el motivo: 'almuerzo', 'medico', etc.
-    #             'break_start': current_time # Guardamos la hora a la que se fue
-    #         })
-
-    #         return {
-    #             'status': 'success',
-    #             'message': f'Salida temporal registrada con éxito por motivo: {reason}'
-    #         }
-
-    #     except Exception as e:
-    #         return {"status": "error", "message": f"Error interno: {str(e)}"}
-
-
-    # # 2. ENDPOINT PARA VOLVER DE LA PAUSA (Anular el estado de ausencia)
-    # @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False)
-    # def attendance_resume(self, **post):
-    #     employee_id = post.get("employee_id")
-    #     current_time = post.get("current_time")
-
-    #     if not all([employee_id, current_time]):
-    #         return {"status": "error", "message": "Faltan parametros obligatorios"}
-
-    #     try:
-    #         # Buscamos el último registro para quitarle el estado de pausa
-    #         attendance = request.env["maya_attendance.attendance"].sudo().search([
-    #             ('employee_id', '=', int(employee_id)),
-    #             ('is_on_break', '=', True) # Buscamos específicamente el que estaba pausado
-    #         ], limit=1, order='id desc')
-
-    #         if not attendance.exists():
-    #             return {"status": "error", "message": "El empleado no figuraba como 'Fuera del centro'"}
-
-    #         # MODIFICAMOS EL REGISTRO: Volvemos al estado normal
-    #         attendance.write({
-    #             'is_on_break': False,
-    #             'break_end': current_time # Opcional: si quieres trackear cuánto tiempo tardó en volver
-    #         })
-
-    #         return {
-    #             'status': 'success',
-    #             'message': 'Regreso registrado. El empleado vuelve a estar activo.'
-    #         }
-
-    #     except Exception as e:
-    #         return {"status": "error", "message": f"Error interno: {str(e)}"}
-
-
     @http.route( #Endpoint para cambiar la hora del fichje del empleado
         '/api/cambiar_hora_fichaje',
         type='json',
@@ -380,3 +312,6 @@ class MayaAttendance(http.Controller):
                 "status": "error",
                 "message": "Datos inválidos"
             }
+
+
+    
