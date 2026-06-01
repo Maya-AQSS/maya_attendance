@@ -252,8 +252,16 @@ class MayaAttendance(http.Controller):
 
     @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
     def attendance_pause(self, **post):
+        #Key api para evitar que cualquiera utilice la api
+        if request.httprequest.headers.get('api-key') != "pass": 
+            return {
+                "status": "error",
+                "message": "No autorizado"
+            }
+
+
         employee_id = post.get("employee_id")
-        reason = post.get("reason", "Descanso") # Por defecto 'break', puede ser 'lunch', 'pharmacy', etc.
+        reason = post.get("reason", "Descanso")
         terminal_id = post.get('terminal_id')
         location_id = post.get('location_id')
 
@@ -264,7 +272,6 @@ class MayaAttendance(http.Controller):
             # Buscamos el último fichaje activo de este empleado (que no tenga hora de salida real)
             attendance = request.env["maya_attendance.attendance"].sudo().search([
                 ('employee_id', '=', int(employee_id)),
-                # ('check_out', '=', False) 
             ], limit=1, order='id desc')
 
             if not attendance.exists():
@@ -292,7 +299,7 @@ class MayaAttendance(http.Controller):
     @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False)
     def attendance_resume(self, **post):
         employee_id = post.get("employee_id")
-        reason = post.get("reason", "Descanso") # Por defecto 'break', puede ser 'lunch', 'pharmacy', etc.
+        reason = post.get("reason", "Descanso")
         terminal_id = post.get('terminal_id')
         location_id = post.get('location_id')
 
