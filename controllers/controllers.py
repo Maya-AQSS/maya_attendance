@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 class MayaAttendance(http.Controller):
 
     #Funcion para buscar emplados a partir del codigo RFID
-    @http.route('/api/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
+    @http.route('/api/v1/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
     def buscar_empleado(self, codigo_rfid, **kwargs):
 
         #Buscamos el empleado a partir del modelo heredado
@@ -37,7 +37,7 @@ class MayaAttendance(http.Controller):
 
     #Funcion para buscar emplados a partir de su dni
     #TODO Implementar que se busque con din y constraseña
-    @http.route('/api/empleado_dni/<string:dni>', type='http', auth='none', website=True)
+    @http.route('/api/v1/empleado_dni/<string:dni>', type='http', auth='none', website=True)
     def buscar_empleado_por_dni(self, dni, **kwargs):
         
         if dni.isdigit(): #Validacion numerica
@@ -121,7 +121,7 @@ class MayaAttendance(http.Controller):
         
 
     # Funcion para comprobar si el fichaje es doble
-    @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
+    @http.route('/api/v1/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):
         
         # Buscamos al empleado a partir de su id
@@ -182,7 +182,7 @@ class MayaAttendance(http.Controller):
         return hora_actual > hora_sesion, hora_actual, hora_sesion
 
     # Funcion para comprobar si se ha fichado despues del comienzo de la ultima sesion
-    @http.route('/api/comprobar_sesion', type = 'http', auth='none', website=True)
+    @http.route('/api/v1/comprobar_sesion', type = 'http', auth='none', website=True)
     def comprobar_sesion(self, **kargs):
         
         dia_semana = self.calcular_dia_semana() # Dia de la semana con formato de caracter
@@ -217,7 +217,7 @@ class MayaAttendance(http.Controller):
         )
         
 
-    @http.route('/api/buscar_estado_fichaje/<int:employee_id>', type='http', auth='none', website=True)
+    @http.route('/api/v1/buscar_estado_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_estado_fichaje(self, employee_id, **kwargs):
         
         # Buscamos al empleado a partir de su id
@@ -334,7 +334,7 @@ class MayaAttendance(http.Controller):
 
 
     @http.route( #Endpoint para cambiar la hora del fichje del empleado
-        '/api/cambiar_hora_fichaje',
+        '/api/v1/cambiar_hora_fichaje',
         type='json',
         auth='none',
         methods=['POST'],
