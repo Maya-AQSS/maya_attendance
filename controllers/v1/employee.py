@@ -5,11 +5,19 @@ from odoo.fields import Datetime
 import pytz
 from datetime import datetime, timedelta
 
-class MayaAttendance(http.Controller):
+from ..api_auth import ApiBaseController, json_response, error_response
+
+class MayaAttendance(ApiBaseController):
 
     #Funcion para buscar emplados a partir del codigo RFID
     @http.route('/api/v1/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
     def buscar_empleado(self, codigo_rfid, **kwargs):
+        
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
 
         #Buscamos el empleado a partir del modelo heredado
         empleado = request.env['maya_core.employee'].sudo().search([
@@ -40,6 +48,12 @@ class MayaAttendance(http.Controller):
     @http.route('/api/v1/empleado_dni/<string:dni>', type='http', auth='none', website=True)
     def buscar_empleado_por_dni(self, dni, **kwargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         if dni.isdigit(): #Validacion numerica
             return request.make_response(
                 json.dumps({"status": "error", "message": "Error, introduce la letra"}),
@@ -72,6 +86,13 @@ class MayaAttendance(http.Controller):
 
     @http.route('/api/v1/attendance/log', type='json', auth='none', methods=['POST'], csrf=False)
     def log_attendance(self, **post):
+
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         # Extraemos los datos del diccionario
         employee_id = post.get('employee_id')
         attendance_type = post.get('type')
@@ -124,6 +145,12 @@ class MayaAttendance(http.Controller):
     @http.route('/api/v1/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         # Buscamos al empleado a partir de su id
         employee = request.env['maya_core.employee'].sudo().browse(employee_id) 
         segundos = self.env['ir.config_parameter'].sudo().get_param(
@@ -185,6 +212,12 @@ class MayaAttendance(http.Controller):
     @http.route('/api/v1/comprobar_sesion', type = 'http', auth='none', website=True)
     def comprobar_sesion(self, **kargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         dia_semana = self.calcular_dia_semana() # Dia de la semana con formato de caracter
         
         session = request.env['maya_core.session_schedule'].sudo().search(
@@ -220,6 +253,12 @@ class MayaAttendance(http.Controller):
     @http.route('/api/v1/buscar_estado_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_estado_fichaje(self, employee_id, **kwargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         # Buscamos al empleado a partir de su id
         employee = request.env['maya_core.employee'].sudo().browse(employee_id) 
 
@@ -252,12 +291,11 @@ class MayaAttendance(http.Controller):
 
     @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
     def attendance_pause(self, **post):
-        #Key api para evitar que cualquiera utilice la api
-        if request.httprequest.headers.get('api-key') != "pass": 
-            return {
-                "status": "error",
-                "message": "No autorizado"
-            }
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
 
 
         employee_id = post.get("employee_id")
@@ -298,6 +336,12 @@ class MayaAttendance(http.Controller):
 
     @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False)
     def attendance_resume(self, **post):
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         employee_id = post.get("employee_id")
         reason = post.get("reason", "Descanso")
         terminal_id = post.get('terminal_id')
@@ -341,6 +385,12 @@ class MayaAttendance(http.Controller):
         csrf=False
     )
     def cambiar_hora_fichaje(self, **post):
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         #Key api para evitar que cualquiera utilice la api
         if request.httprequest.headers.get('api-key') != "pass": 
             return {
