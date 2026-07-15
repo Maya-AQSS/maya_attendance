@@ -2,14 +2,22 @@ from odoo import http
 from odoo.http import request
 import json
 from odoo.fields import Datetime
-from datetime import datetime
 import pytz
+from datetime import datetime, timedelta
 
-class MayaAttendance(http.Controller):
+from ..api_auth import ApiBaseController, json_response, error_response
+
+class MayaAttendance(ApiBaseController):
 
     #Funcion para buscar emplados a partir del codigo RFID
-    @http.route('/api/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
+    @http.route('/api/v1/empleado_rfid/<string:codigo_rfid>', type='http', auth='none', website=True)
     def buscar_empleado(self, codigo_rfid, **kwargs):
+        
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
 
         #Buscamos el empleado a partir del modelo heredado
         empleado = request.env['maya_core.employee'].sudo().search([
@@ -37,9 +45,15 @@ class MayaAttendance(http.Controller):
 
     #Funcion para buscar emplados a partir de su dni
     #TODO Implementar que se busque con din y constraseña
-    @http.route('/api/empleado_dni/<string:dni>', type='http', auth='none', website=True)
+    @http.route('/api/v1/empleado_dni/<string:dni>', type='http', auth='none', website=True)
     def buscar_empleado_por_dni(self, dni, **kwargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         if dni.isdigit(): #Validacion numerica
             return request.make_response(
                 json.dumps({"status": "error", "message": "Error, introduce la letra"}),
@@ -72,6 +86,13 @@ class MayaAttendance(http.Controller):
 
     @http.route('/api/v1/attendance/log', type='json', auth='none', methods=['POST'], csrf=False)
     def log_attendance(self, **post):
+
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         # Extraemos los datos del diccionario
         employee_id = post.get('employee_id')
         attendance_type = post.get('type')
@@ -121,9 +142,15 @@ class MayaAttendance(http.Controller):
         
 
     # Funcion para comprobar si el fichaje es doble
-    @http.route('/api/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
+    @http.route('/api/v1/buscar_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_fichaje_empleado(self, employee_id, **kwargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         # Buscamos al empleado a partir de su id
         employee = request.env['maya_core.employee'].sudo().browse(employee_id) 
         segundos = self.env['ir.config_parameter'].sudo().get_param(
@@ -170,7 +197,8 @@ class MayaAttendance(http.Controller):
         return now.hour + (now.minute / 60)
 
     def calcular_hora_minutos(self):
-        now = self.get_now_madrid()
+        tz = pytz.timezone("Europe/Madrid")
+        now = datetime.now(pytz.utc).astimezone(tz)
         return now.hour * 60 + now.minute
 
 
@@ -181,9 +209,15 @@ class MayaAttendance(http.Controller):
         return hora_actual > hora_sesion, hora_actual, hora_sesion
 
     # Funcion para comprobar si se ha fichado despues del comienzo de la ultima sesion
-    @http.route('/api/comprobar_sesion', type = 'http', auth='none', website=True)
+    @http.route('/api/v1/comprobar_sesion', type = 'http', auth='none', website=True)
     def comprobar_sesion(self, **kargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         dia_semana = self.calcular_dia_semana() # Dia de la semana con formato de caracter
         
         session = request.env['maya_core.session_schedule'].sudo().search(
@@ -216,9 +250,15 @@ class MayaAttendance(http.Controller):
         )
         
 
-    @http.route('/api/buscar_estado_fichaje/<int:employee_id>', type='http', auth='none', website=True)
+    @http.route('/api/v1/buscar_estado_fichaje/<int:employee_id>', type='http', auth='none', website=True)
     def buscar_ultimo_estado_fichaje(self, employee_id, **kwargs):
         
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
         # Buscamos al empleado a partir de su id
         employee = request.env['maya_core.employee'].sudo().browse(employee_id) 
 
@@ -248,101 +288,163 @@ class MayaAttendance(http.Controller):
             headers=[('Content-Type', 'application/json')]
         )
 
-    # @http.route('api/cambiar_hora_fichaje', type='json', auth='none', methods=['POST'], csrf=False)
-    # def cambiar_hora_fichaje(self, **post): # Funcion para cambiar la hora del fichaje
-    #         employee_id = post.get("employee_id")
-    #         last_hour = post.get("last_hour")
-    #         new_hour = post.get("new_hour")
 
-    #         if not all([employee_id, last_hour, new_hour]):
-    #             return {"status": "error", "message": "Faltan parametros"}
-            
-    #         try:
-    #             employee = request.env["maya_attendance.attendance"].sudo().search([
-    #                 ('employee_id', '=', int(employee_id)),
-    #                 ('check_time', '=', float(last_hour))
-    #             ], limit=1)
-    #             if not employee.exists():
-    #                 return {"status": "error", "message": "Emoleado no encontrado"}
+    @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
+    def attendance_pause(self, **post):
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
 
 
-    #             employee.write({
-    #                 'check_time': new_hour,
-    #             })
-                
-    #             return {
-    #                 'status': 'success',
-    #                 'message': 'Hora cambiada correctamente'
-    #             }
 
-    #         except (ValueError, TypeError):
-    #             return {"status": "error", "message": "ID de empleado no valido"}
+        employee_id = post.get("employee_id")
+        reason = post.get("reason", "Descanso")
+        terminal_id = post.get('terminal_id')
+        location_id = post.get('location_id')
 
+        if not all([employee_id, terminal_id, location_id]):
+            return {"status": "error", "message": "Faltan parametros obligatorios (employee_id, current_time)"}
 
-    # @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
-    # def attendance_pause(self, **post):
-    #     employee_id = post.get("employee_id")
-    #     reason = post.get("reason", "break") # Por defecto 'break', puede ser 'lunch', 'pharmacy', etc.
-    #     current_time = post.get("current_time") # La hora actual enviada por el dispositivo/app
+        try:
+            # Buscamos el último fichaje activo de este empleado (que no tenga hora de salida real)
+            attendance = request.env["maya_attendance.attendance"].sudo().search([
+                ('employee_id', '=', int(employee_id)),
+            ], limit=1, order='id desc')
 
-    #     if not all([employee_id, current_time]):
-    #         return {"status": "error", "message": "Faltan parametros obligatorios (employee_id, current_time)"}
+            if not attendance.exists():
+                return {"status": "error", "message": "No se encontro un fichaje activo para este empleado"}
 
-    #     try:
-    #         # Buscamos el último fichaje activo de este empleado (que no tenga hora de salida real)
-    #         attendance = request.env["maya_attendance.attendance"].sudo().search([
-    #             ('employee_id', '=', int(employee_id)),
-    #             # ('check_out', '=', False) <-- Si usas el flujo nativo de Odoo
-    #         ], limit=1, order='id desc')
+             # Finalmente devolvemos todos los valores
+            request.env['maya_attendance.attendance'].sudo().create({
+                'employee_id': employee_id,  # Usamos el ID del objeto que hemos validado
+                'attendance_type': 'P',
+                'terminal_id': terminal_id,
+                'location_id': location_id,
+                'justification': reason,
+                'total_time': 0
+            })
 
-    #         if not attendance.exists():
-    #             return {"status": "error", "message": "No se encontro un fichaje activo para este empleado"}
+            return {
+                'status': 'success',
+                'message': f'Salida temporal registrada con éxito por motivo: {reason}'
+            }
 
-    #         # MODIFICAMOS EL REGISTRO: Marcamos que salió temporalmente
-    #         attendance.write({
-    #             'is_on_break': True,        # Campo hipotético para saber si está en pausa
-    #             'break_reason': reason,    # Guardamos el motivo: 'almuerzo', 'medico', etc.
-    #             'break_start': current_time # Guardamos la hora a la que se fue
-    #         })
-
-    #         return {
-    #             'status': 'success',
-    #             'message': f'Salida temporal registrada con éxito por motivo: {reason}'
-    #         }
-
-    #     except Exception as e:
-    #         return {"status": "error", "message": f"Error interno: {str(e)}"}
+        except Exception as e:
+            return {"status": "error", "message": f"Error interno: {str(e)}"}
 
 
-    # # 2. ENDPOINT PARA VOLVER DE LA PAUSA (Anular el estado de ausencia)
-    # @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False)
-    # def attendance_resume(self, **post):
-    #     employee_id = post.get("employee_id")
-    #     current_time = post.get("current_time")
+    @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False)
+    def attendance_resume(self, **post):
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
 
-    #     if not all([employee_id, current_time]):
-    #         return {"status": "error", "message": "Faltan parametros obligatorios"}
 
-    #     try:
-    #         # Buscamos el último registro para quitarle el estado de pausa
-    #         attendance = request.env["maya_attendance.attendance"].sudo().search([
-    #             ('employee_id', '=', int(employee_id)),
-    #             ('is_on_break', '=', True) # Buscamos específicamente el que estaba pausado
-    #         ], limit=1, order='id desc')
+        employee_id = post.get("employee_id")
+        reason = post.get("reason", "Descanso")
+        terminal_id = post.get('terminal_id')
+        location_id = post.get('location_id')
 
-    #         if not attendance.exists():
-    #             return {"status": "error", "message": "El empleado no figuraba como 'Fuera del centro'"}
+        if not all([employee_id, reason, terminal_id, location_id]):
+            return {"status": "error", "message": "Faltan parametros obligatorios"}
 
-    #         # MODIFICAMOS EL REGISTRO: Volvemos al estado normal
-    #         attendance.write({
-    #             'is_on_break': False,
-    #             'break_end': current_time # Opcional: si quieres trackear cuánto tiempo tardó en volver
-    #         })
+        try:
+            # Buscamos el último registro para quitarle el estado de pausa
+            attendance = request.env["maya_attendance.attendance"].sudo().search([
+                ('employee_id', '=', int(employee_id)),
+                ('attendance_type', '=', 'P') # Buscamos específicamente el que estaba pausado
+            ], limit=1, order='id desc')
 
-    #         return {
-    #             'status': 'success',
-    #             'message': 'Regreso registrado. El empleado vuelve a estar activo.'
-    #         }
+            if not attendance.exists():
+                return {"status": "error", "message": "El empleado no figuraba como 'Fuera del centro'"}
+       
+            tz = pytz.timezone("Europe/Madrid")
+            now_local = datetime.now(pytz.utc).astimezone(tz)
+            hora_formateada = now_local.strftime("%H:%M") 
 
-    #     except Exception as e:
-    #         return {"status": "error", "message": f"Error interno: {str(e)}"}
+            attendance.write({
+                'total_time': hora_formateada
+            })
+
+            return {
+                'status': 'success',
+                'message': 'Regreso registrado. El empleado vuelve a estar activo.'
+            }
+
+        except Exception as e:
+            return {"status": "error", "message": f"Error interno: {str(e)}"}
+
+
+    @http.route( #Endpoint para cambiar la hora del fichje del empleado
+        '/api/v1/cambiar_hora_fichaje',
+        type='json',
+        auth='none',
+        methods=['POST'],
+        csrf=False
+    )
+    def cambiar_hora_fichaje(self, **post):
+        #Validacion mediante api key
+        _, err = self._authenticate_app()
+        if err:
+            return err
+
+
+        #Key api para evitar que cualquiera utilice la api
+        if request.httprequest.headers.get('api-key') != "pass": 
+            return {
+                "status": "error",
+                "message": "No autorizado"
+            }
+
+        # Se consigen los elementos del JSON enviado
+        employee_id = post.get("employee_id")
+        last_hour = post.get("last_hour")
+        new_hour = post.get("new_hour")
+        type = post.get("type")
+
+        #Se comprueben que esten todos
+        if not all([employee_id, last_hour, new_hour, type]): 
+            return {
+                "status": "error",
+                "message": "Faltan parámetros"
+            }
+
+        try:
+            base_time = datetime.strptime(last_hour, "%Y-%m-%d %H:%M:%S")
+
+            start = base_time.replace(second=0)
+            end = start + timedelta(minutes=1)
+
+            #Se consigue el empleado
+            attendance = request.env["maya_attendance.attendance"].sudo().search([
+                ('employee_id', '=', int(employee_id)),
+                ('check_time', '>=', start),
+                ('check_time', '<', end),
+                ('attendance_type','=',type)
+            ], limit=1)
+
+            if not attendance:
+                return {
+                    "status": "error",
+                    "message": "Fichaje no encontrado"
+                }
+
+            attendance.write({ # se cambia su hora de fichaje
+                'check_time': new_hour
+            })
+
+            return {
+                "status": "success",
+                "message": "Hora cambiada correctamente"
+            }
+
+        except (ValueError, TypeError): #Se captura la excepcion por si hay algun error
+            return {
+                "status": "error",
+                "message": "Datos inválidos"
+            }
+
+
+    

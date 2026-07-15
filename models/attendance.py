@@ -2,6 +2,7 @@
 from odoo import models, fields, api
 from datetime import datetime
 from odoo.fields import Datetime
+from odoo.exceptions import ValidationError
 
 class MayaAttendance(models.Model):
     # Nombre y descripcion del modelo
@@ -48,7 +49,8 @@ class MayaAttendance(models.Model):
     # Campo para seleccionar el tipo de fichaje
     attendance_type = fields.Selection([
         ('I', 'Entrada'),
-        ('O', 'Salida')
+        ('O', 'Salida'),
+        ('P', 'Pausa')
     ], string='Tipo', required=True)
 
     # Campo para guardar el id
@@ -60,6 +62,9 @@ class MayaAttendance(models.Model):
         string='Ubicación', 
         required=True
     )
+
+    justification = fields.Text(string="Justificación")
+    total_time = fields.Char(string="Entrada")
     
     # Calcula la hora actual
     def _compute_time(self):
@@ -70,3 +75,9 @@ class MayaAttendance(models.Model):
                 rec.check_time_only = local_time.strftime("%H:%M")
             else:
                 rec.check_time_only = ""
+    
+    @api.constrains('attendance_type', 'justification')
+    def _check_justification(self):
+        for rec in self:
+            if rec.attendance_type == 'P' and not rec.justification:
+                raise ValidationError("La pausa requiere justificación")
