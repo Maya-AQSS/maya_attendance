@@ -25,6 +25,15 @@
 
                         </block>
 
+                        <block title="Fichajes por API">
+
+                            <setting string="Ubicación de los fichajes por API"
+                                     help="Ubicación de los fichajes que registran otros servicios, como el dashboard. Si no se indica, la sede CEED.">
+                                <field name="attendance_api_location_id"/>
+                            </setting>
+
+                        </block>
+
                     </app>
 
                 </xpath>

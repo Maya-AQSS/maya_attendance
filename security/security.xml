@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Grupo de los usuarios técnicos que registran fichajes desde otro servicio (D21): el dashboard
+             ficha por POST /api/v1/attendance/clock con la clave de API de un usuario que solo tiene este
+             grupo. Sus únicos permisos son crear fichajes (ir.model.access.csv); no implica ningún tipo de
+             usuario (ni interno ni portal), así que no ve nada más de Odoo ni puede entrar en la interfaz.
+             El usuario y su clave no van en los datos del módulo: los crea el despliegue
+             (scripts/registrar_usuario_fichajes.py). -->
+        <record id="group_attendance_clock" model="res.groups">
+            <field name="name">Maya | Asistencia: registrar fichajes por API (usuario técnico)</field>
+            <field name="comment">Solo para usuarios técnicos de servicios (p. ej. maya-dashboard): pueden crear fichajes con el endpoint /api/v1/attendance/clock y nada más.</field>
+        </record>
+
+    </data>
+</odoo>
