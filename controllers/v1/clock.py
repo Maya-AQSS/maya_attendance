@@ -32,8 +32,9 @@ Respuestas (JSON, siempre con ``success``; los errores, con ``code`` y ``error``
     422 ``VALIDATION_ERROR``: el modelo rechaza el fichaje.
     503 ``LOCATION_NOT_CONFIGURED``: no hay ubicación para los fichajes de la API.
 
-«Hoy» es el día en Europe/Madrid. Una entrada sigue abierta mientras su último fichaje de entrada o
-salida del día sea una entrada (las pausas no cuentan). Dos fichajes a la vez del mismo empleado no se
+«Hoy» es el día en Europe/Madrid. Hay una entrada abierta si el último fichaje del empleado de hoy es
+una entrada; una salida o una pausa la cierran, como en el quiosco (``buscar_estado_fichaje``) y en la
+vista de lectura del dashboard (``v_app_attendances``). Dos fichajes a la vez del mismo empleado no se
 duplican: el segundo espera al primero y Odoo lo reintenta (ver ``_lock_employee``).
 """
 import logging
@@ -129,7 +130,6 @@ class AttendanceClockController(http.Controller):
         day, day_start, day_end = _local_day(now)
         last = request.env['maya_attendance.attendance'].sudo().search([
             ('employee_id', '=', employee.id),
-            ('attendance_type', 'in', list(CLOCK_TYPES)),
             ('check_time', '>=', day_start),
             ('check_time', '<', day_end),
         ], order='check_time desc, id desc', limit=1)

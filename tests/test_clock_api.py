@@ -128,7 +128,8 @@ class TestAttendanceClockApi(HttpCase):
         self.assertEqual(self._clock('O').json()['code'], 'NO_OPEN_CHECK_IN')
         self.assertEqual(self._clock('I').status_code, 201)
 
-    def test_pause_does_not_close_the_entry(self):
+    def test_pause_closes_the_entry(self):
+        """Como el quiosco y la vista del dashboard: tras una pausa no hay entrada abierta."""
         self._clock('I')
         self.Attendance.create({
             'employee_id': self.employee.id,
@@ -138,8 +139,8 @@ class TestAttendanceClockApi(HttpCase):
             'location_id': self.location.id,
         })
 
-        self.assertEqual(self._clock('I').json()['code'], 'ALREADY_CHECKED_IN')
-        self.assertEqual(self._clock('O').status_code, 201)
+        self.assertEqual(self._clock('O').json()['code'], 'NO_OPEN_CHECK_IN')
+        self.assertEqual(self._clock('I').status_code, 201)
 
     def test_default_location_is_the_main_site(self):
         self.env['ir.config_parameter'].sudo().set_param('maya_attendance.api_location_id', False)
