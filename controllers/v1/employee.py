@@ -84,7 +84,8 @@ class MayaAttendance(ApiBaseController):
             headers=[('Content-Type', 'application/json')]
         )
 
-    @http.route('/api/v1/attendance/log', type='json', auth='none', methods=['POST'], csrf=False)
+    @http.route('/api/v1/attendance/log', type='json', auth='none', methods=['POST'], csrf=False,
+                readonly=False)
     def log_attendance(self, **post):
 
         #Validacion mediante api key
@@ -153,7 +154,7 @@ class MayaAttendance(ApiBaseController):
 
         # Buscamos al empleado a partir de su id
         employee = request.env['maya_core.employee'].sudo().browse(employee_id) 
-        segundos = self.env['ir.config_parameter'].sudo().get_param(
+        segundos = request.env['ir.config_parameter'].sudo().get_param(
             'maya_attendance.double_signing_time',
             default='300'
         )
@@ -289,7 +290,8 @@ class MayaAttendance(ApiBaseController):
         )
 
 
-    @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False)
+    @http.route('/api/v1/attendance/pause', type='json', auth='none', methods=['POST'], csrf=False,
+                readonly=False)
     def attendance_pause(self, **post):
         #Validacion mediante api key
         _, err = self._authenticate_app()
@@ -334,7 +336,8 @@ class MayaAttendance(ApiBaseController):
             return {"status": "error", "message": f"Error interno: {str(e)}"}
 
 
-    @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False)
+    @http.route('/api/v1/attendance/resume', type='json', auth='none', methods=['POST'], csrf=False,
+                readonly=False)
     def attendance_resume(self, **post):
         #Validacion mediante api key
         _, err = self._authenticate_app()
@@ -382,7 +385,9 @@ class MayaAttendance(ApiBaseController):
         type='json',
         auth='none',
         methods=['POST'],
-        csrf=False
+        csrf=False,
+        # Odoo 19 abre en solo lectura las rutas auth='none' y esta escribe
+        readonly=False,
     )
     def cambiar_hora_fichaje(self, **post):
         #Validacion mediante api key
@@ -391,12 +396,6 @@ class MayaAttendance(ApiBaseController):
             return err
 
 
-        #Key api para evitar que cualquiera utilice la api
-        if request.httprequest.headers.get('api-key') != "pass": 
-            return {
-                "status": "error",
-                "message": "No autorizado"
-            }
 
         # Se consigen los elementos del JSON enviado
         employee_id = post.get("employee_id")

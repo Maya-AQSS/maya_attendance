@@ -1,6 +1,6 @@
 {
     'name': 'Maya | Attendance',
-    'version': '1.1',
+    'version': '1.2',
     'summary': 'Modulo Maya | Attendance para la gestion del fichaje',
     'depends': [
         'maya_core',

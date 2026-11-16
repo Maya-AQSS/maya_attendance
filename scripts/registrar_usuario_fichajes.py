@@ -17,8 +17,10 @@ números, «-» o «_»). Este script no la muestra nunca.
 Variables de entorno:
   MAYA_ATTENDANCE_API_KEY       la clave (o MAYA_ATTENDANCE_API_KEY_FILE con la ruta de un fichero que la
                                 contenga); obligatoria
-  MAYA_ATTENDANCE_LOGIN         login del usuario técnico (por defecto svc-maya-dashboard)
-  MAYA_ATTENDANCE_KEY_NAME      nombre de la clave (por defecto maya-dashboard)
+  MAYA_ATTENDANCE_TIPO          dashboard (por defecto: servicios que fichan por /api/v1/attendance/clock) o
+                                quiosco (el quiosco de fichajes: grupo group_attendance_kiosk)
+  MAYA_ATTENDANCE_LOGIN         login del usuario técnico (por defecto svc-maya-dashboard o svc-maya-quiosco)
+  MAYA_ATTENDANCE_KEY_NAME      nombre de la clave (por defecto maya-dashboard o maya-quiosco)
 
 El script se lee por la entrada estándar, así que la clave llega por una variable de entorno. Ejemplo en el
 clúster, sin que la clave pase por la línea de órdenes ni por la salida (la primera línea de la entrada es
@@ -42,15 +44,24 @@ if key_file:
         api_key = handle.read().strip()
 else:
     api_key = os.environ.get('MAYA_ATTENDANCE_API_KEY', '').strip()
-login = os.environ.get('MAYA_ATTENDANCE_LOGIN', 'svc-maya-dashboard').strip()
-key_name = os.environ.get('MAYA_ATTENDANCE_KEY_NAME', 'maya-dashboard').strip()
+TIPOS = {
+    'dashboard': ('svc-maya-dashboard', 'maya-dashboard', 'maya_attendance.group_attendance_clock'),
+    'quiosco': ('svc-maya-quiosco', 'maya-quiosco', 'maya_attendance.group_attendance_kiosk'),
+}
+tipo = os.environ.get('MAYA_ATTENDANCE_TIPO', 'dashboard').strip()
+if tipo not in TIPOS:
+    print(f'RESULTADO: ERROR — MAYA_ATTENDANCE_TIPO={tipo!r}: dashboard o quiosco')
+    sys.exit(1)
+login = os.environ.get('MAYA_ATTENDANCE_LOGIN', TIPOS[tipo][0]).strip()
+key_name = os.environ.get('MAYA_ATTENDANCE_KEY_NAME', TIPOS[tipo][1]).strip()
 
 if not api_key:
     print('RESULTADO: ERROR — falta la clave (MAYA_ATTENDANCE_API_KEY o MAYA_ATTENDANCE_API_KEY_FILE)')
     sys.exit(1)
 
 try:
-    user = env['res.users']._maya_attendance_register_clock_user(login, api_key, key_name=key_name)  # noqa: F821
+    user = env['res.users']._maya_attendance_register_clock_user(
+        login, api_key, key_name=key_name, group=TIPOS[tipo][2])  # noqa: F821
     env.cr.commit()  # noqa: F821
 except Exception as exc:  # noqa: BLE001
     env.cr.rollback()  # noqa: F821
