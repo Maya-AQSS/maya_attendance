@@ -103,6 +103,9 @@ class AttendanceClockController(http.Controller):
         methods=['POST'],
         csrf=False,
         save_session=False,
+        # Odoo 19 abre en solo lectura las rutas auth='none': el UPDATE de _lock_employee fallaba y
+        # Odoo repetía la petición entera con un cursor de escritura (un ERROR en el log por fichaje).
+        readonly=False,
     )
     def clock(self, **kwargs):
         service_user, error = self._authenticate_service()
