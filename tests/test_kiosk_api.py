@@ -27,6 +27,9 @@ class TestKioskApi(HttpCase):
             'team_ids': [(6, 0, [])],
             'id_card_rfid': RFID,
         })
+        # Con un usuario activo: «active» del empleado es el de su usuario y la búsqueda por RFID no ve los archivados
+        cls.employee_user = new_test_user(cls.env, login='empleado.quiosco', groups='base.group_user')
+        cls.employee_user.maya_employee_id = cls.employee
         Users = cls.env['res.users']
         cls.kiosk_key = 'clave-de-prueba-del-quiosco-0123456789abcdef'
         cls.kiosk_user = Users._maya_attendance_register_clock_user(
