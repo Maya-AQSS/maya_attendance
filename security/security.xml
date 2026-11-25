@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Grupo de los usuarios técnicos que registran fichajes desde otro servicio (D21): el dashboard
+             ficha por POST /api/v1/attendance/clock con la clave de API de un usuario que solo tiene este
+             grupo. Sus únicos permisos son crear fichajes (ir.model.access.csv); no implica ningún tipo de
+             usuario (ni interno ni portal), así que no ve nada más de Odoo ni puede entrar en la interfaz.
+             El usuario y su clave no van en los datos del módulo: los crea el despliegue
+             (scripts/registrar_usuario_fichajes.py). -->
+        <record id="group_attendance_clock" model="res.groups">
+            <field name="name">Maya | Asistencia: registrar fichajes por API (usuario técnico)</field>
+            <field name="comment">Solo para usuarios técnicos de servicios (p. ej. maya-dashboard): pueden crear fichajes con el endpoint /api/v1/attendance/clock y nada más.</field>
+        </record>
+
+        <!-- Grupo del usuario técnico del quiosco de fichajes (controllers/api_auth.py): los endpoints del
+             quiosco (/api/v1/empleado_*, /api/v1/attendance/log, pause y resume, /api/v1/buscar_*,
+             /api/v1/comprobar_sesion y /api/v1/cambiar_hora_fichaje) trabajan con sudo y solo aceptan
+             claves de API de ámbito maya_attendance de un usuario con este grupo. Lo crea el despliegue
+             (scripts/registrar_usuario_fichajes.py con MAYA_ATTENDANCE_TIPO=quiosco). -->
+        <record id="group_attendance_kiosk" model="res.groups">
+            <field name="name">Maya | Asistencia: quiosco de fichajes (usuario técnico)</field>
+            <field name="comment">Solo para el usuario técnico del quiosco: los endpoints del quiosco solo aceptan su clave de API.</field>
+        </record>
+
+    </data>
+</odoo>

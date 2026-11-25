@@ -6,6 +6,8 @@ from jose import jwt, JWTError        # pip install python-jose
 from odoo import http
 from odoo.http import request, Response
 
+from ..models.res.res_users import API_KEY_SCOPE, KIOSK_GROUP
+
 _logger = logging.getLogger(__name__)
 
 # Configuración de Keycloak
@@ -39,53 +41,41 @@ def error_response(message, code, http_status=400):
 
 class ApiBaseController(http.Controller):
 
-  # Autenticar la aplicación
+  # Autenticar la aplicación: el quiosco de fichajes
   def _authenticate_app(self):
     """
-    Valida que la petición viene de una app autorizada mediante Bearer token.
-    Usa _check_credentials() de Odoo que maneja el hash internamente.
+    Valida que la petición viene del quiosco: `Authorization: Bearer <clave de API>` de un usuario técnico con
+    el grupo maya_attendance.group_attendance_kiosk y una clave de ámbito maya_attendance (la registra
+    scripts/registrar_usuario_fichajes.py con MAYA_ATTENDANCE_TIPO=quiosco).
+
+    Antes valía cualquier clave `rpc` o global de cualquier usuario activo, y los endpoints trabajan con sudo:
+    con la clave de cualquiera se podían leer DNI, fichar por otros o cambiar horas.
+    Devuelve (usuario técnico, None) o (None, respuesta de error).
     """
     auth_header = request.httprequest.headers.get('Authorization', '')
-
     if not auth_header.startswith('Bearer '):
         return None, error_response(
             'Header Authorization requerido. '
             'Formato: Authorization: Bearer <api_key>',
             'MISSING_AUTH', 401,
         )
-
-    api_key = auth_header[len('Bearer '):]
-
+    api_key = auth_header[len('Bearer '):].strip()
     try:
-        # _check_credentials recibe la key en CLARO,
-        # la hashea internamente y la compara con la BD.
-        # Devuelve el user_id si es válida, None si no.
-        uid = request.env['res.users.apikeys'].sudo()._check_credentials(
-            scope='rpc',
-            key=api_key,
-        )
-
-        if not uid:
-            return None, error_response(
-                'API key inválida o expirada.',
-                'INVALID_API_KEY', 401,
-            )
-
-        app_user = request.env['res.users'].sudo().browse(uid)
-        if not app_user.exists() or not app_user.active:
-            return None, error_response(
-                'Usuario de servicio inactivo.',
-                'SERVICE_USER_INACTIVE', 401,
-            )
-
-        return app_user, None
-
+        # _check_credentials recibe la clave en claro y la compara con el hash guardado
+        uid = request.env['res.users.apikeys'].sudo()._check_credentials(scope=API_KEY_SCOPE, key=api_key)
     except Exception as e:
         _logger.warning('Error validando API key: %s', e)
-        return None, error_response(
-            'API key inválida o expirada.',
-            'INVALID_API_KEY', 401,
-        )
+        uid = None
+    if not uid:
+        return None, error_response('API key inválida o expirada.', 'INVALID_API_KEY', 401)
+
+    app_user = request.env['res.users'].sudo().browse(uid)
+    if not app_user.exists() or not app_user.active:
+        return None, error_response('Usuario de servicio inactivo.', 'SERVICE_USER_INACTIVE', 401)
+    if not app_user.has_group(KIOSK_GROUP):
+        _logger.warning('Quiosco: el usuario %s no tiene el grupo %s', app_user.login, KIOSK_GROUP)
+        return None, error_response('La clave no es la del usuario técnico del quiosco.', 'FORBIDDEN', 403)
+    return app_user, None
 
   # Identificar el usuario humano (via Keycloak JWT)
   def _identify_human_user(self, keycloak_token: str):
